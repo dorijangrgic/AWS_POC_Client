@@ -5,7 +5,7 @@ on:
     branches: [ dev ]
 
 env:
-  run_id: ${{ github.run_id }}
+  run_id: DEV-client-${{ github.run_id }}
 
 jobs:
   
@@ -34,7 +34,7 @@ jobs:
         run: |
           cd simple-demo-app
           docker build -t $ECR_REGISTRY/${{ vars.ECR_REPOSITORY }}:${{ env.run_id }} .
-          docker push $ECR_REGISTRY/${{ vars.ECR_REPOSITORY }}:${{ env.run_id }}
+          docker push $ECR_REGISTRY/${{ vars.ECR_REPOSITORY }}:${{ env.run_id }} .
           echo ::set-output name=image::$ECR_REGISTRY/${{ vars.ECR_REPOSITORY }}:$IMAGE_TAG
 
       - name: Install jq cli tool
@@ -45,7 +45,7 @@ jobs:
 
       - name: Update Dockerrun.aws.json file with docker image url
         run: |
-          jq '.containerDefinitions[1].image=${{ steps.login-ecr.outputs.registry }}/${{ vars.ECR_REPOSITORY }}:${{ env.run_id }}' Dockerrun.aws.json > updated-Dockerrun.aws.json
+          jq '.containerDefinitions[1].image="${{ steps.login-ecr.outputs.registry }}/${{ vars.ECR_REPOSITORY }}:${{ env.run_id }}"' Dockerrun.aws.json > updated-Dockerrun.aws.json
           mv updated-Dockerrrun.aws.json Dockerrun.aws.json
       
       - name: Push updated Dockerrun.aws.json file with corresponding zip file
