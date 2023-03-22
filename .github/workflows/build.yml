@@ -4,6 +4,9 @@ on:
   push:
     branches: [ main ]
 
+env:
+  run_id: PROD-portal-${{ github.run_id }}
+
 jobs:
   
   build:
@@ -29,7 +32,7 @@ jobs:
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         run: |
-          cd SimpleMinimalApi
+          cd simple-demo-app
           docker build -t $ECR_REGISTRY/${{ vars.ECR_REPOSITORY }}:${{ env.run_id }} .
           docker push $ECR_REGISTRY/${{ vars.ECR_REPOSITORY }}:${{ env.run_id }}
           echo ::set-output name=image::$ECR_REGISTRY/${{ vars.ECR_REPOSITORY }}:$IMAGE_TAG
@@ -37,19 +40,17 @@ jobs:
       - name: Install jq cli tool
         run: sudo apt-get install jq
 
-      - name: Download Dockerrun.aws.json
-        run: aws s3 cp s3://${{ vars.S3_BUCKET }} Dockerrun.aws.json
+      - name: Download Dockerrun.aws.jsonm
+        run: aws s3 cp s3://${{ vars.S3_BUCKET }}/Dockerrun.aws.json .
 
       - name: Update Dockerrun.aws.json file with docker image url
         run: |
-#          update image url and save to updated-Dockerrun.aws.json file
-           jq '.containerDefinitions[] | select(.name=="web-api") | .image=${{ steps.login-ecr.outputs.registry }}/${{ vars.ECR_REPOSITORY }}:${{ env.run_id }}' Dockerrun.aws.json > updated-Dockerrun.aws.json
-#          replace Dockerrun.aws.json file with the updated file
-           mv updated-Dockerrrun.aws.json Dockerrun.aws.json
+          jq '.containerDefinitions[0].image="${{ steps.login-ecr.outputs.registry }}/${{ vars.ECR_REPOSITORY }}:${{ env.run_id }}"' Dockerrun.aws.json > Dockerrun.aws.updated.json
+          mv Dockerrun.aws.updated.json Dockerrun.aws.json
+          cat Dockerrun.aws.json
 
       - name: Push updated Dockerrun.aws.json file with corresponding zip file
         run: |
           zip Dockerrun.zip Dockerrun.aws.json
-#         json file is pushed because another repository must use that same file to update it's image url (client-app)
           aws s3 cp Dockerrun.aws.json s3://${{ vars.S3_BUCKET }}
           aws s3 cp Dockerrun.zip s3://${{ vars.S3_BUCKET }}
