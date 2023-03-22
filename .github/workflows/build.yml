@@ -45,7 +45,7 @@ jobs:
 
       - name: Update Dockerrun.aws.json file with docker image url
         run: |
-          jq '.containerDefinitions[0].image="${{ steps.login-ecr.outputs.registry }}/${{ vars.ECR_REPOSITORY }}:${{ env.run_id }}"' Dockerrun.aws.json > Dockerrun.aws.updated.json
+          jq '.containerDefinitions[1].image="${{ steps.login-ecr.outputs.registry }}/${{ vars.ECR_REPOSITORY }}:${{ env.run_id }}"' Dockerrun.aws.json > Dockerrun.aws.updated.json
           mv Dockerrun.aws.updated.json Dockerrun.aws.json
           cat Dockerrun.aws.json
 
