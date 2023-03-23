@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  web-api:
+    image: 
+    container_name: SimpleMinimalApi
+    ports:
+      - '80:80'
+
+  client-app:
+    image:
+    container_name: simple-demo-app
+    ports:
+      - '3000:3000'
