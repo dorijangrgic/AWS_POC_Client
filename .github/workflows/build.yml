@@ -51,4 +51,4 @@ jobs:
       
       - name: Push updated docker-compose.yml file
         run: |
-          aws s3 cp docker-compose.yml s3://${{ vars.S3_BUCKET }}/prod
+          aws s3 cp docker-compose.yml s3://${{ vars.S3_BUCKET }}/prod/
