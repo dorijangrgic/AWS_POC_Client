@@ -17,7 +17,7 @@ export default function Home() {
       <main className={styles.main}>
         <div className={styles.description}>
           <p>
-            TactaDemoApp&nbsp;
+            TactaDemoApp-Development&nbsp;
             <code className={styles.code}>src/pages/index.tsx</code>
           </p>
           <div>
