@@ -40,7 +40,6 @@ jobs:
       - name: Download docker-compose.yml file
         run: |
           aws s3 cp s3://${{ vars.S3_BUCKET }}/${{ env.name }}/docker-compose.yml .
-          cat docker-compose.yml
 
       - name: Install yq cli tool and update docker-compose.yml file with docker image url
         run: |
