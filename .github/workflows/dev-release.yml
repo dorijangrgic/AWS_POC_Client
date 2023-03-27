@@ -1,17 +1,17 @@
-name: PROD - Deploy
+name: DEV - Release
 
 on:
   workflow_run:
     workflows:
-      - "PROD - Build"
+      - "DEV - Build"
     branches:
-      - main
+      - dev
     types:
       - completed
 
 env:
-  name: prod
-  build_run_id: prod-portal-${{ github.event.workflow_run.id }}
+  name: dev
+  build_run_id: dev-portal-${{ github.event.workflow_run.id }}
 
 jobs:
 

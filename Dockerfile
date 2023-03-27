@@ -10,6 +10,7 @@ RUN npm ci
 # Copy the application source code to the working directory
 COPY . .
 
+# Set copy specified env to working directory
 ARG ENVIRONMENT=production
 COPY env/.env.${ENVIRONMENT} .env.local
 
