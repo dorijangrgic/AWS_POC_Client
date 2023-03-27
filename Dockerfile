@@ -10,6 +10,9 @@ RUN npm ci
 # Copy the application source code to the working directory
 COPY . .
 
+ARG ENVIRONMENT=production
+COPY env/.env.${ENVIRONMENT} .env.local
+
 # Development stage
 FROM base as development
 ENV NODE_ENV=development
