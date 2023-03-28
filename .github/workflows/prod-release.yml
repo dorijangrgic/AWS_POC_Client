@@ -1,23 +1,14 @@
 name: PROD - Release
 
-on:
-  workflow_run:
-    workflows:
-      - "PROD - Build"
-    branches:
-      - main
-    types:
-      - completed
+on: workflow_dispatch
 
 env:
-  name: prod
-  build_run_id: prod-portal-${{ github.event.workflow_run.id }}
+  build_run_id: portal-${{ github.event.workflow_run.id }}
 
 jobs:
 
   deploy:
     runs-on: ubuntu-latest
-    environment: ${{ env.name }}
 
     steps:
       - name: Configure AWS credentials
@@ -27,7 +18,10 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
+      - name: Download ${{ vars.LAST_RUN_ID }} file
+        run: aws s3 cp s3://${{ vars.S3_BUCKET }}/dev/${{ vars.LAST_RUN_ID }} .
+
       - name: Deploy to Elastic Beanstalk
         run: |
-          aws elasticbeanstalk create-application-version --application-name ${{ vars.EB_APPLICATION }} --version-label ${{ env.build_run_id }} --source-bundle S3Bucket=${{ vars.S3_BUCKET }},S3Key="${{ env.name }}/docker-compose.yml"
-          aws elasticbeanstalk update-environment --application-name ${{ vars.EB_APPLICATION }} --environment-name ${{ vars.EB_ENVIRONMENT }} --version-label ${{ env.build_run_id }}
+          RUN_ID=`cat ${{ vars.LAST_RUN_ID }}`
+          aws elasticbeanstalk update-environment --application-name ${{ vars.EB_APPLICATION }} --environment-name ${{ vars.EB_ENVIRONMENT }} --version-label $RUN_ID

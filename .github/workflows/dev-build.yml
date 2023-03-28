@@ -6,14 +6,13 @@ on:
       - dev
 
 env:
-  name: dev
-  run_id: dev-portal-${{ github.run_id }}
+  run_id: portal-${{ github.run_id }}
 
 jobs:
   
   build:
     runs-on: ubuntu-latest
-    environment: ${{ env.name }}
+    environment: Dev
 
     steps:
       - name: Checkout repository
@@ -39,7 +38,7 @@ jobs:
 
       - name: Download docker-compose.yml file
         run: |
-          aws s3 cp s3://${{ vars.S3_BUCKET }}/${{ env.name }}/docker-compose.yml .
+          aws s3 cp s3://${{ vars.S3_BUCKET }}/dev/docker-compose.yml .
           cat docker-compose.yml
 
       - name: Install yq cli tool and update docker-compose.yml file with docker image url
@@ -51,4 +50,6 @@ jobs:
 
       - name: Push updated docker-compose.yml file
         run: |
-          aws s3 cp docker-compose.yml s3://${{ vars.S3_BUCKET }}/${{ env.name }}/
+          echo ${{ env.run_id }} > ${{ vars.LAST_RUN_ID }}
+          aws s3 cp docker-compose.yml s3://${{ vars.S3_BUCKET }}/dev/
+          aws s3 cp ${{ vars.LAST_RUN_ID }} s3://${{ vars.S3_BUCKET }}/dev/
