@@ -1,0 +1,27 @@
+name: PROD - Release
+
+on: workflow_dispatch
+
+env:
+  build_run_id: portal-${{ github.event.workflow_run.id }}
+
+jobs:
+
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Download ${{ vars.LAST_RUN_ID }} file
+        run: aws s3 cp s3://${{ vars.S3_BUCKET }}/dev/${{ vars.LAST_RUN_ID }} .
+
+      - name: Deploy to Elastic Beanstalk
+        run: |
+          RUN_ID=`cat ${{ vars.LAST_RUN_ID }}`
+          aws elasticbeanstalk update-environment --application-name ${{ vars.EB_APPLICATION }} --environment-name ${{ vars.EB_ENVIRONMENT }} --version-label $RUN_ID

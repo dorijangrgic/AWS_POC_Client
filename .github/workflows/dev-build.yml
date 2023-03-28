@@ -1,17 +1,18 @@
-name: PROD - Build
+name: DEV - Build
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - dev
 
 env:
-  run_id: PROD-portal-${{ github.run_id }}
+  run_id: portal-${{ github.run_id }}
 
 jobs:
   
   build:
     runs-on: ubuntu-latest
-    environment: Prod
+    environment: Dev
 
     steps:
       - name: Checkout repository
@@ -32,23 +33,23 @@ jobs:
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         run: |
-          cd simple-demo-app
-          docker build -t $ECR_REGISTRY/${{ vars.ECR_REPOSITORY }}:${{ env.run_id }} --target production .
+          docker build -t $ECR_REGISTRY/${{ vars.ECR_REPOSITORY }}:${{ env.run_id }} .
           docker push $ECR_REGISTRY/${{ vars.ECR_REPOSITORY }}:${{ env.run_id }}
-          echo ::set-output name=image::$ECR_REGISTRY/${{ vars.ECR_REPOSITORY }}:$IMAGE_TAG
 
       - name: Download docker-compose.yml file
         run: |
-          aws s3 cp s3://${{ vars.S3_BUCKET }}/prod/docker-compose.yml .
+          aws s3 cp s3://${{ vars.S3_BUCKET }}/dev/docker-compose.yml .
           cat docker-compose.yml
 
       - name: Install yq cli tool and update docker-compose.yml file with docker image url
         run: |
           sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
           sudo chmod a+x /usr/local/bin/yq
-          yq e -i '.services.client-app.image="${{ steps.login-ecr.outputs.registry }}/${{ vars.ECR_REPOSITORY }}:${{ env.run_id }}"' docker-compose.yml
+          yq e -i '.services.web-api.image="${{ steps.login-ecr.outputs.registry }}/${{ vars.ECR_REPOSITORY }}:${{ env.run_id }}"' docker-compose.yml
           cat docker-compose.yml
-      
+
       - name: Push updated docker-compose.yml file
         run: |
-          aws s3 cp docker-compose.yml s3://${{ vars.S3_BUCKET }}/prod/
+          echo ${{ env.run_id }} > ${{ vars.LAST_RUN_ID }}
+          aws s3 cp docker-compose.yml s3://${{ vars.S3_BUCKET }}/dev/
+          aws s3 cp ${{ vars.LAST_RUN_ID }} s3://${{ vars.S3_BUCKET }}/dev/

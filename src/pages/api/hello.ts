@@ -9,5 +9,12 @@ export default function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
-  res.status(200).json({ name: 'John Doe' })
+
+  let responseData = {
+    name: 'John',
+    surname: 'Doe',
+    api_url: process.env.WEB_API_URL
+  };
+
+  res.status(200).json(responseData);
 }
