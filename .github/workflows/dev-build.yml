@@ -58,6 +58,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     environment: Dev
+    needs: build
 
     steps:
       - name: Configure AWS credentials
