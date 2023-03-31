@@ -40,9 +40,9 @@ jobs:
         run: |
           aws s3 cp s3://${{ vars.S3_BUCKET }}/dev/${{ vars.LAST_RUN_ID }} .
           ls
-          RUN_ID=`cat ${{ vars.LAST_RUN_ID }}` + .zip
-          cat $RUN_ID
-          aws s3 cp s3://${{ vars.S3_BUCKET }}/dev/$RUN_ID.zip .
+          RUN_ID=`cat ${{ vars.LAST_RUN_ID }}`.zip
+          echo $RUN_ID
+          aws s3 cp s3://${{ vars.S3_BUCKET }}/dev/$RUN_ID .
           ls
           unzip $RUN_ID -d unzipped
           sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
