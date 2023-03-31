@@ -40,7 +40,7 @@ jobs:
         run: |
           aws s3 cp s3://${{ vars.S3_BUCKET }}/dev/${{ vars.LAST_RUN_ID }} .
           ls
-          RUN_ID=`cat ${{ vars.LATEST_RUN_ID }}`
+          RUN_ID=`cat ${{ vars.LAST_RUN_ID }}`
           cat $RUN_ID
           aws s3 cp s3://${{ vars.S3_BUCKET }}/dev/$RUN_ID.zip .
           ls
