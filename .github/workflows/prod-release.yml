@@ -2,13 +2,11 @@ name: PROD - Release
 
 on: workflow_dispatch
 
-env:
-  build_run_id: portal-${{ github.event.workflow_run.id }}
-
 jobs:
 
   deploy:
     runs-on: ubuntu-latest
+    environment: Prod
 
     steps:
       - name: Configure AWS credentials
