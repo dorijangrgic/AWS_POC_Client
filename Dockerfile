@@ -20,7 +20,7 @@ ENV NODE_ENV=development
 # Build the Next.js application
 RUN npm run build
 # Expose the application port
-EXPOSE 3000
+EXPOSE 80
 # Start the application
 CMD ["npm", "run", "dev"]
 
@@ -30,6 +30,6 @@ ENV NODE_ENV=production
 # Build the Next.js application
 RUN npm run build
 # Expose the application port
-EXPOSE 3000
+EXPOSE 80
 # Start the application
 CMD ["npm", "run", "start"]
