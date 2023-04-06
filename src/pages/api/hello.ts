@@ -13,7 +13,7 @@ export default function handler(
   let responseData = {
     name: 'John',
     surname: 'Doe',
-    api_url: process.env.WEB_API_URL
+    api_url: process.env.API_URL
   };
 
   res.status(200).json(responseData);
