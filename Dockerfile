@@ -11,12 +11,12 @@ RUN npm ci
 COPY . .
 
 # Set copy specified env to working directory
-ARG ENVIRONMENT=production
+ARG ENVIRONMENT=prod
 COPY env/.env.${ENVIRONMENT} .env.local
 
 # Development stage
-FROM base as development
-ENV NODE_ENV=development
+FROM base as dev
+ENV NODE_ENV=dev
 # Build the Next.js application
 RUN npm run build
 # Expose the application port
@@ -25,8 +25,8 @@ EXPOSE 3000
 CMD ["npm", "run", "dev"]
 
 # Production stage
-FROM base as production
-ENV NODE_ENV=production
+FROM base as prod
+ENV NODE_ENV=prod
 # Build the Next.js application
 RUN npm run build
 # Expose the application port
