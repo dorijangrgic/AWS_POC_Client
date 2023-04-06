@@ -15,8 +15,8 @@ ARG ENVIRONMENT=production
 COPY env/.env.${ENVIRONMENT} .env.local
 
 # Development stage
-FROM base as development
-ENV NODE_ENV=development
+FROM base as integration
+ENV NODE_ENV=integration
 # Build the Next.js application
 RUN npm run build
 # Expose the application port
