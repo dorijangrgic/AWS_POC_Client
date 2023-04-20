@@ -1,6 +1,9 @@
-name: Prod - Release
+name: TEST - Release
 
-on: workflow_dispatch
+on:
+  push:
+    branches:
+      - main
 
 permissions:
   id-token: write
@@ -11,7 +14,7 @@ jobs:
   elastic-beanstalk-app-version:
     name: Create new app version on elastic beanstalk
     runs-on: ubuntu-latest
-    environment: Prod
+    environment: Test
 
     steps:
       - name: Configure AWS credentials
@@ -26,7 +29,7 @@ jobs:
   deploy-to-elastic-beanstalk:
     name: Deploy to elastic beanstalk
     runs-on: ubuntu-latest
-    environment: Prod
+    environment: Test
     needs: elastic-beanstalk-app-version
     
     steps:

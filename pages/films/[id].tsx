@@ -1,6 +1,6 @@
 import { GetServerSideProps } from "next";
 import { Content, StrapiResponse } from "../../models/strapi";
-import { FilmAttribute } from "../../models/film";
+import { FilmAttribute } from "../../models/common";
 import markdownToHtml from "../../lib/markdown";
 
 export const getServerSideProps: GetServerSideProps = async (context) => {

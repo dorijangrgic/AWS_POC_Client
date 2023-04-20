@@ -1,6 +1,6 @@
 import { GetStaticProps } from "next";
 import { Content, StrapiResponse } from "../../models/strapi";
-import { FilmAttribute } from "../../models/film";
+import { FilmAttribute } from "../../models/common";
 
 export const getStaticProps: GetStaticProps = async () => {
   const films: StrapiResponse = await fetch(

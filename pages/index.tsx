@@ -1,9 +1,6 @@
 import { GetStaticProps } from "next";
-import { Attribute, Content, StrapiResponse } from "../models/strapi";
-
-interface About extends Attribute {
-  about: string;
-}
+import { Content, StrapiResponse } from "../models/strapi";
+import { About } from "../models/common";
 
 export const getStaticProps: GetStaticProps = async () => {
   const about: StrapiResponse = await fetch(
@@ -19,7 +16,7 @@ export const getStaticProps: GetStaticProps = async () => {
   };
 };
 
-export default function Home({ aboutAttributes }: { aboutAttributes: About }) {
+export default function AboutPage({aboutAttributes}: {aboutAttributes: About}) {
   return (
     <div dangerouslySetInnerHTML={{ __html: aboutAttributes.about }}></div>
   );

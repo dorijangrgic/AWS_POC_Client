@@ -5,3 +5,11 @@ export interface FilmAttribute extends Attribute {
   plot: string;
   author: string;
 }
+
+export interface About extends Attribute {
+  about: string;
+}
+
+export interface Home extends Attribute {
+  home: string;
+}
