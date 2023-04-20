@@ -1,4 +1,4 @@
-name: INT - Build and Release
+name: INT - Build, Release
 
 on:
   push:
@@ -6,22 +6,27 @@ on:
       - dev
 
 env:
-  run_id: INT-portal-${{ github.run_id }}
+  run_id: ui-${{ github.run_id }}
+  
+permissions:
+  id-token: write
+  contents: read
 
 jobs:
-  build:
+
+  build-docker-image:
+    name: Build docker image
     runs-on: ubuntu-latest
     environment: Int
-
+    
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v2
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          role-to-assume: ${{ secrets.AWS_OIDC_ROLE }}
           aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Login to Amazon ECR
@@ -32,44 +37,78 @@ jobs:
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         run: |
-          docker build -t $ECR_REGISTRY/${{ vars.ECR_REPOSITORY }}:${{ env.run_id }} --target dev --build-arg ENVIRONMENT=dev .
+          docker build -t $ECR_REGISTRY/${{ vars.ECR_REPOSITORY }}:${{ env.run_id }} .
           docker push $ECR_REGISTRY/${{ vars.ECR_REPOSITORY }}:${{ env.run_id }}
+
+  update-docker-compose:
+    name: Update docker-compose.yml file in S3 bucket
+    runs-on: ubuntu-latest
+    environment: Int
+    needs: build-docker-image
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+            
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: ${{ secrets.AWS_OIDC_ROLE }}
+          aws-region: ${{ secrets.AWS_REGION }}
+        
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
 
       - name: Download latest docker-compose.yml file if exists in the S3 bucket
         run: |
           cd utility
           sudo chmod +x download_docker-compose.sh
-          ./download_docker-compose.sh ${{ vars.S3_BUCKET }} int ${{ vars.LAST_RUN_ID }}
+          ./download_docker-compose.sh ${{ vars.S3_BUCKET }}/${{ vars.S3_BUCKET_DIR }} ${{ vars.LAST_RUN_ID }}
 
       - name: Update the docker-compose.yml file with new image url
         run: |
           cd utility
           sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
           sudo chmod a+x /usr/local/bin/yq
-          yq e -i '.services.web-portal.image="${{ steps.login-ecr.outputs.registry }}/${{ vars.ECR_REPOSITORY }}:${{ env.run_id }}"' docker-compose.yml
+          yq e -i '.services.ui.image="${{ steps.login-ecr.outputs.registry }}/${{ vars.ECR_REPOSITORY }}:${{ env.run_id }}"' docker-compose.yml
 
       - name: Push docker-compose.yml with the corresponding zip file
         run: |
           cd utility
           echo ${{ env.run_id }} > ${{ vars.LAST_RUN_ID }}
           zip -r ${{ env.run_id }}.zip docker-compose.yml
-          aws s3 cp ${{ env.run_id }}.zip s3://${{ vars.S3_BUCKET }}/int/
-          aws s3 cp ${{ vars.LAST_RUN_ID }} s3://${{ vars.S3_BUCKET }}/int/
-
-  deploy:
+          aws s3 cp ${{ env.run_id }}.zip s3://${{ vars.S3_BUCKET }}/${{ vars.S3_BUCKET_DIR }}/
+          aws s3 cp ${{ vars.LAST_RUN_ID }} s3://${{ vars.S3_BUCKET }}/${{ vars.S3_BUCKET_DIR }}/
+  
+  elastic-beanstalk-app-version:
+    name: Create new app version on elastic beanstalk
     runs-on: ubuntu-latest
     environment: Int
-    needs: build
+    needs: update-docker-compose
 
     steps:
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v2
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          role-to-assume: ${{ secrets.AWS_OIDC_ROLE }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Create app version
+        run: aws elasticbeanstalk create-application-version --application-name ${{ vars.EB_APPLICATION }} --version-label ${{ env.run_id }} --source-bundle S3Bucket=${{ vars.S3_BUCKET }},S3Key="${{ vars.S3_BUCKET_DIR }}/${{ env.run_id }}.zip"
+          
+  deploy-to-elastic-beanstalk:
+    name: Deploy to elastic beanstalk
+    runs-on: ubuntu-latest
+    environment: Int
+    needs: elastic-beanstalk-app-version
+    
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: ${{ secrets.AWS_OIDC_ROLE }}
           aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Deploy to Elastic Beanstalk
-        run: |
-          aws elasticbeanstalk create-application-version --application-name ${{ vars.EB_APPLICATION }} --version-label ${{ env.run_id }} --source-bundle S3Bucket=${{ vars.S3_BUCKET }},S3Key="int/${{ env.run_id }}.zip"
-          aws elasticbeanstalk update-environment --application-name ${{ vars.EB_APPLICATION }} --environment-name ${{ vars.EB_ENVIRONMENT }} --version-label ${{ env.run_id }}
+        run: aws elasticbeanstalk update-environment --application-name ${{ vars.EB_APPLICATION }} --environment-name ${{ vars.EB_ENVIRONMENT }} --version-label ${{ env.run_id }}

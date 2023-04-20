@@ -2,7 +2,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 
 type Data = {
-  name: string
+  api_url: string | undefined
 }
 
 export default function handler(
@@ -10,9 +10,7 @@ export default function handler(
   res: NextApiResponse<Data>
 ) {
 
-  let responseData = {
-    name: 'John',
-    surname: 'Doe',
+  let responseData : Data = {
     api_url: process.env.API_URL
   };
 
