@@ -49,6 +49,11 @@ jobs:
     needs: build-docker-image
     
     steps:
+
+      - env:
+          ECR_REGISTRY: ${{ needs.build-docker-image.outputs.ecr }}
+        run: echo $ECR_REGISTRY
+
       - name: Checkout repository
         uses: actions/checkout@v3
             
