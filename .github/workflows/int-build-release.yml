@@ -68,7 +68,7 @@ jobs:
 
       - name: Update the docker-compose.yml file with new image url
         env:
-        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         run: |
           cd utility
           sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
