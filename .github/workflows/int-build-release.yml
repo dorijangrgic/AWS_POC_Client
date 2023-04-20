@@ -67,7 +67,6 @@ jobs:
           ./download_docker-compose.sh ${{ vars.S3_BUCKET }}/${{ vars.S3_BUCKET_DIR }} ${{ vars.LAST_RUN_ID }}
 
       - name: Update the docker-compose.yml file with new image url
-        env:
         run: |
           cd utility
           sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
