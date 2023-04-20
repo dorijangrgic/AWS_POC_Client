@@ -1,4 +1,4 @@
-name: INT - Build, Migrations, Release
+name: INT - Build, Release
 
 on:
   push:
@@ -13,33 +13,15 @@ permissions:
   contents: read
 
 jobs:
-  
-  prepare-repo:
-    name: Prepare repository
-    runs-on: ubuntu-latest
-    environment: Int
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: Upload repo as artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: repo
-          path: .
 
   build-docker-image:
     name: Build docker image
     runs-on: ubuntu-latest
     environment: Int
-    needs: prepare-repo
     
     steps:
-      - name: Download repo artifact
-        uses: actions/download-artifact@v2
-        with:
-          name: repo
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
@@ -65,10 +47,8 @@ jobs:
     needs: build-docker-image
     
     steps:
-      - name: Download repo artifact
-        uses: actions/download-artifact@v2
-        with:
-          name: repo
+      - name: Checkout repository
+        uses: actions/checkout@v3
             
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
@@ -87,7 +67,7 @@ jobs:
           cd utility
           sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
           sudo chmod a+x /usr/local/bin/yq
-          yq e -i '.services.web-ui.image="${{ steps.login-ecr.outputs.registry }}/${{ vars.ECR_REPOSITORY }}:${{ env.run_id }}"' docker-compose.yml
+          yq e -i '.services.web-portal.image="${{ steps.login-ecr.outputs.registry }}/${{ vars.ECR_REPOSITORY }}:${{ env.run_id }}"' docker-compose.yml
 
       - name: Push docker-compose.yml with the corresponding zip file
         run: |
