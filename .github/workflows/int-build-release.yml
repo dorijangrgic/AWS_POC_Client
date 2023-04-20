@@ -18,8 +18,6 @@ jobs:
     name: Build docker image
     runs-on: ubuntu-latest
     environment: Int
-    outputs:
-      ecr: ${{ steps.login-ecr.outputs.registry }}
     
     steps:
       - name: Checkout repository
@@ -49,11 +47,6 @@ jobs:
     needs: build-docker-image
     
     steps:
-
-      - env:
-          ECR_REGISTRY: ${{ needs.build-docker-image.outputs.ecr }}
-        run: echo $ECR_REGISTRY
-
       - name: Checkout repository
         uses: actions/checkout@v3
             
@@ -63,6 +56,10 @@ jobs:
           role-to-assume: ${{ secrets.AWS_OIDC_ROLE }}
           aws-region: ${{ secrets.AWS_REGION }}
         
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
       - name: Download latest docker-compose.yml file if exists in the S3 bucket
         run: |
           cd utility
@@ -70,11 +67,13 @@ jobs:
           ./download_docker-compose.sh ${{ vars.S3_BUCKET }}/${{ vars.S3_BUCKET_DIR }} ${{ vars.LAST_RUN_ID }}
 
       - name: Update the docker-compose.yml file with new image url
+        env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         run: |
           cd utility
           sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
           sudo chmod a+x /usr/local/bin/yq
-          yq e -i '.services.ui.image="${{ needs.build-docker-image.outputs.ecr }}/${{ vars.ECR_REPOSITORY }}:${{ env.run_id }}"' docker-compose.yml
+          yq e -i '.services.ui.image="$ECR_REGISTRY/${{ vars.ECR_REPOSITORY }}:${{ env.run_id }}"' docker-compose.yml
 
       - name: Push docker-compose.yml with the corresponding zip file
         run: |
