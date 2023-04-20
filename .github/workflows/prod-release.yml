@@ -8,26 +8,10 @@ permissions:
 
 jobs:
 
-  elastic-beanstalk-app-version:
-    name: Create new app version on elastic beanstalk
-    runs-on: ubuntu-latest
-    environment: Prod
-
-    steps:
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          role-to-assume: ${{ secrets.AWS_OIDC_ROLE }}
-          aws-region: ${{ secrets.AWS_REGION }}
-
-      - name: Create app version
-        run: aws elasticbeanstalk create-application-version --application-name ${{ vars.EB_APPLICATION }} --version-label ${{ env.run_id }} --source-bundle S3Bucket=${{ vars.S3_BUCKET }},S3Key="${{ vars.S3_BUCKET_DIR }}/${{ env.run_id }}.zip"
-          
   deploy-to-elastic-beanstalk:
     name: Deploy to elastic beanstalk
     runs-on: ubuntu-latest
     environment: Prod
-    needs: elastic-beanstalk-app-version
     
     steps:
       - name: Configure AWS credentials
@@ -36,5 +20,10 @@ jobs:
           role-to-assume: ${{ secrets.AWS_OIDC_ROLE }}
           aws-region: ${{ secrets.AWS_REGION }}
 
+      - name: Download ${{ vars.LAST_RUN_ID }} file
+        run: aws s3 cp s3://${{ vars.S3_BUCKET }}/${{ vars.S3_BUCKET_DIR }}/${{ vars.LAST_RUN_ID }} .
+
       - name: Deploy to Elastic Beanstalk
-        run: aws elasticbeanstalk update-environment --application-name ${{ vars.EB_APPLICATION }} --environment-name ${{ vars.EB_ENVIRONMENT }} --version-label ${{ env.run_id }}
+        run: |
+          RUN_ID=`cat ${{ vars.LAST_RUN_ID }}`
+          aws elasticbeanstalk update-environment --application-name ${{ vars.EB_APPLICATION }} --environment-name ${{ vars.EB_ENVIRONMENT }} --version-label $RUN_ID
