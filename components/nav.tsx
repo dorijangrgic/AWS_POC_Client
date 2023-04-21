@@ -7,14 +7,14 @@ const handleClick = (param: String) => {
 
 export default function Nav() {
   return (
-    <nav className="flex flex-wrap justify-center items-center px-4 py-4 md:py-0.5 text-lg text-gray-700 bg-prodia-blue drop-shadow-sm">
+    <nav className="flex justify-center items-center px-4 py-4 md:py-0.5 text-lg text-gray-700 bg-prodia-blue drop-shadow-sm">
       <div className="flex justify-center items-center w-auto">
         <button onClick={() => handleClick("hhhh")}>
-          <Bars3Icon className="w-8 h-8 md:hidden text-gray-500" />
+          <Bars3Icon className="w-8 h-8 md:hidden text-prodia-teal-medium" />
         </button>
 
         <div
-          className="hidden w-full md:flex md:items-center md:w-auto"
+          className="hidden md:flex md:items-center md:w-auto"
           id="menu"
         >
           <NavItems />

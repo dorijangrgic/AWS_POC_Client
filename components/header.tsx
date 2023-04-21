@@ -3,7 +3,7 @@ import Link from "next/link";
 export default function Header() {
   return (
     <div className="px-4">
-      <div className="flex justify-between items-center w-5/12 mx-auto my-8 px-12 py-8">
+      <div className="flex flex-wrap justify-between items-center w-5/12 mx-auto my-8 px-8 py-8">
         <Link href="/" passHref>
           {/*eslint-disable @next/next/no-img-element */}
           <img
