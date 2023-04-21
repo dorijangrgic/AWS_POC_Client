@@ -7,7 +7,7 @@ const handleClick = (param: String) => {
 };
 
 const Nav = () => (
-  <nav className="flex flex-wrap justify-center items-center px-4 py-4 md:py-0 text-lg text-gray-700 bg-teal-500 drop-shadow-lg">
+  <nav className="flex flex-wrap justify-center items-center px-4 py-4 md:py-0 text-lg text-gray-700 bg-prodia-blue drop-shadow-md">
 
     <div className="flex justify-center items-center w-auto">
       <button onClick={() => handleClick("hhhh")}>

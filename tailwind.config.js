@@ -2,11 +2,15 @@
 module.exports = {
   content: [
     "./pages/**/*.{js,ts,jsx,tsx}",
-    "./components/**/*.{js,ts,jsx,tsx}"
+    "./components/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        "prodia-blue": "#D0EAF1",
+        "prodia-green": "#026666"        
+      },
+    },
   },
   plugins: [],
-}
-
+};
