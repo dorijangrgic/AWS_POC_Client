@@ -14,7 +14,7 @@ const Layout: FC<Props> = (props) => (
       <title>Prodia</title>
     </Head>
 
-    <div className="m-8 flex flex-row justify-around items-center">
+    <div className="flex flex-row justify-around items-center mx-36 py-12">
       <Link href="/" passHref>
         {/*eslint-disable @next/next/no-img-element */}
         <img
@@ -36,7 +36,7 @@ const Layout: FC<Props> = (props) => (
     <Nav />
 
     <main className="px-4">
-      <div className="flex justify-center items-center bg-white mx-auto w-7/12 rounded-lg my-16 p-16">
+      <div className="flex justify-center items-center bg-white mx-auto w-6/12 rounded-lg my-16 p-16">
         {props.children}
       </div>
     </main>
