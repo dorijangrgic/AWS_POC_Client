@@ -1,10 +1,10 @@
 export default function Footer() {
   return (
-    <div className="flex flex-col justify-between items-center py-8 bg-prodia-green text-white">
-      <div className="w-full my-8">
+    <div className="py-6 bg-prodia-teal-dark text-white">
+      <div className="my-6">
         <hr className="border-y border-white"></hr>
       </div>
-      <div className="w-6/12 p-4">
+      <div className="w-5/12 mx-auto px-14 py-8">
         <h1>footer</h1>
       </div>
     </div>

@@ -8,7 +8,8 @@ module.exports = {
     extend: {
       colors: {
         "prodia-blue": "#D0EAF1",
-        "prodia-green": "#026666"        
+        "prodia-teal-dark": "#026666",
+        "prodia-teal-medium": "#049999"
       },
     },
   },
